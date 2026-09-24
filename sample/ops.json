@@ -1,0 +1,11 @@
+{
+  "version_invariant": true,
+  "ops": [
+    {"op": "fire", "event": "start"},
+    {"op": "migrate", "target": 2},
+    {"op": "fire", "event": "run"},
+    {"op": "migrate", "target": 3, "fail": true},
+    {"op": "rollback"},
+    {"op": "fire", "event": "stop"}
+  ]
+}
