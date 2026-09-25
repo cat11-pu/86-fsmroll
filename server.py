@@ -8,10 +8,23 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from fsmroll import Machine
 
 ENGINE = Machine()
+
+
+def _mutate(handler):
+    """变更类操作：执行后自动落盘快照，保证 /recover 可恢复。"""
+    def run(payload):
+        result = handler(payload)
+        ENGINE.persist()
+        return result
+    return run
+
+
 ROUTES = {
-    "/fire": lambda payload: ENGINE.fire(payload["event"]),
-    "/migrate": lambda payload: ENGINE.migrate(payload["target"], payload.get("fail", False)),
-    "/rollback": lambda payload: ENGINE.rollback(),
+    "/fire": _mutate(lambda payload: ENGINE.fire(payload["event"])),
+    "/migrate": _mutate(lambda payload: ENGINE.migrate(payload["target"], payload.get("fail", False))),
+    "/rollback": _mutate(lambda payload: ENGINE.rollback()),
+    "/persist": lambda payload: {"persisted": len(ENGINE.persist())},
+    "/restore": lambda payload: ENGINE.restore(payload.get("blob")),
     "/recover": lambda payload: ENGINE.recover(),
 }
 

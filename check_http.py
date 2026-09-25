@@ -33,7 +33,7 @@ def main() -> int:
     for step in spec["ops"]:
         route = step["op"]
         result = parse(call("POST", base + "/" + route, json.dumps(step).encode())[1])
-        states.append((route, result.get("state"), result.get("version"), result.get("rolled_back")))
+        states.append((route, result.get("state"), result.get("version"), bool(result.get("rolled_back"))))
     stats = parse(call("GET", base + "/")[1])
     recovered = parse(call("POST", base + "/recover", b"{}")[1])
     print("操作轨迹（操作, 状态, 版本, 是否回滚） =", states)
